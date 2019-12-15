@@ -1,0 +1,118 @@
+# These are the emails you will be censoring. The open() function is opening the text file that the emails are contained in and the .read() method is allowing us to save their contexts to the following variables:
+email_one = open("email_one.txt", "r").read()
+email_two = open("email_two.txt", "r").read()
+email_three = open("email_three.txt", "r").read()
+email_four = open("email_four.txt", "r").read()
+
+import re
+
+#censors the phrase "learning algorithms"
+def censor_phrase(email, censored_word):
+  X = ""
+  for i in range(0, len(censored_word)):
+      X += "X"
+  return email.replace(censored_word, X)
+
+#print(censor_phrase(email_one, "learning algorithms"))
+
+#censors terms in a list from a text
+  
+proprietary_terms = ["she", "personality matrix", "sense of self", "self-preservation", "learning algorithm", "her", "herself"]
+
+def censor_list_words(terms, email):
+  for term in terms:
+    X = ""
+    for i in range(0, len(term)):
+      X += "X"
+    search = re.compile(r'\b(%s)\b' % term, re.I)
+    email = search.sub(X, email)
+
+    #email = re.sub(r'\\b' + term + r'\\b', X, email)
+  return email
+
+print(censor_list_words(proprietary_terms, email_two))
+
+negative_words = ["concerned", "behind", "danger", "dangerous", "alarming", "alarmed", "out of control", "help", "unhappy", "bad", "upset", "awful", "broken", "damage", "damaging", "dismal", "distressed", "distressed", "concerning", "horrible", "horribly", "questionable"]
+
+#Censors words from negative words after they appeared twice
+def censor_negative_words(negative_words, proprietary_terms, email):
+  i = 0
+  separate_sentences=[]
+  new_words=[]
+  not_so_clean_words=[]
+  almost_clean_words=[]
+  clean_words=[]
+  almost_final=[]
+  final=[]
+  words = email.split(" ")
+  for word in words:
+    new_words.extend(word.split("\n"))
+  for word in new_words:
+    not_so_clean_words.extend(word.split(","))
+  for word in not_so_clean_words:
+    almost_clean_words.extend(word.split("."))
+  for word in almost_clean_words:
+    clean_words.extend(word.split("("))
+  for word in clean_words:
+    almost_final.extend(word.split(")"))
+  for term in negative_words:
+    for word in almost_final:
+      if (term==word):
+        i +=1
+    if i > 2:
+      final.append(term)
+  i=0
+  for word in final:
+    X = ""
+    for i in range(0,len(word)):
+      X += "X"
+    search = re.compile(r'\b(%s)\b' % word, re.I)
+    email = search.sub(X, email)
+  email=censor_list_words(proprietary_terms, email)
+  return email
+  
+print(censor_negative_words(negative_words, proprietary_terms, email_three))
+
+#Censors all words before and after prohibited words.
+def censor_all(negative_words, proprietary_terms, email):
+  i = 0
+  separate_sentences=[]
+  new_words=[]
+  not_so_clean_words=[]
+  almost_clean_words=[]
+  clean_words=[]
+  almost_final=[]
+  final=[]
+  words = email.split(" ")
+  for word in words:
+    new_words.extend(word.split("\n"))
+  for word in new_words:
+    not_so_clean_words.extend(word.split(","))
+  for word in not_so_clean_words:
+    almost_clean_words.extend(word.split("."))
+  for word in almost_clean_words:
+    clean_words.extend(word.split("("))
+  for word in clean_words:
+    almost_final.extend(word.split(")"))
+  for term in negative_words:
+    for word in almost_final:
+      if (term==word.lower()):
+        i = almost_final.index(word)
+        final.append(almost_final[i])
+        final.append(almost_final[i-1])
+        final.append(almost_final[i+1])
+  for term in proprietary_terms:
+    for word in almost_final:
+      if (term==word.lower()):
+        i = almost_final.index(word)
+        final.append(almost_final[i])
+        final.append(almost_final[i-1])
+        final.append(almost_final[i+1])
+  for word in final:
+    X = ""
+    for i in range(0,len(word)):
+      X += "X"
+    search = re.compile(r'\b(%s)\b' % word, re.I)
+    email = search.sub(X, email)
+  return email
+print(censor_all(negative_words, proprietary_terms, email_four))  
